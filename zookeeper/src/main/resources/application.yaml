@@ -5,10 +5,9 @@ spring:
         enabled: true  # 使用zookeeper作为注册中心
         register: true  # 使用zookeeper作为注册中心
         preferIpAddress: true  # 设置为true是使用ip地址，false是计算机名
-        root: /service # 默认是/service，这是zookeeper上注册节点的目录，全目录的是： root的值 + application.name + zookeeper的随机UUID
       connect-string: hadoop01:2181,hadoop02:2181,hadoop03:2181
   application:
     name: cloud_e2e
 
 server:
-  port: 8090 # 0表示随机端口
+  port: 0 # 0表示随机端口

@@ -2,6 +2,8 @@ package com.qihao;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.recipes.cache.PathChildrenCache;
+import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.Stat;
@@ -27,15 +29,12 @@ public class ZookeeperDemo {
         //RetryUntilElapsed
         //RetryNTimes
 
-       curatorFramework.start(); //启动
-       // createData(curatorFramework);
-        updateData(curatorFramework);
-       // deleteData(curatorFramework);
-        //CRUD
-//        curatorFramework.create();
-//        curatorFramework.setData(); //修改
-//        curatorFramework.delete() ;// 删除
-//        curatorFramework.getData(); //查询
+        curatorFramework.start(); //启动
+        //createData(curatorFramework);
+        //updateData(curatorFramework);
+        //deleteData(curatorFramework);
+        addListenerWithChild(curatorFramework);
+
     }
 
     private static void createData(CuratorFramework curatorFramework) throws Exception {
@@ -53,6 +52,18 @@ public class ZookeeperDemo {
         Stat stat = new Stat();
         String value = new String(curatorFramework.getData().storingStatIn(stat).forPath("/ZookeeperDemo/program"));
         curatorFramework.delete().withVersion(stat.getVersion()).forPath("/ZookeeperDemo/program");
+    }
+
+    //实现服务注册中心的时候，可以针对服务做动态感知
+    private static void addListenerWithChild(CuratorFramework curatorFramework) throws Exception {
+        PathChildrenCache nodeCache = new PathChildrenCache(curatorFramework, "/services/cloud_e2e", true);
+        PathChildrenCacheListener nodeCacheListener = (curatorFramework1, pathChildrenCacheEvent) -> {
+            System.out.println(pathChildrenCacheEvent.getType() + "->" + new String(pathChildrenCacheEvent.getData().getData()));
+        };
+        nodeCache.getListenable().addListener(nodeCacheListener);
+        nodeCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
+
+        System.in.read();
     }
 
 
