@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qihao.mapper.SysUserMapper">
+
+    <resultMap id="BaseResultMap" type="com.qihao.pojo.SysUser">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="username" jdbcType="VARCHAR" property="username"/>
+        <result column="password" jdbcType="VARCHAR" property="password"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="is_disabled" jdbcType="INTEGER" property="isDisabled"/>
+        <result column="created" jdbcType="VARCHAR" property="created"/>
+        <result column="created_time" jdbcType="TIMESTAMP" property="createdTime"/>
+        <result column="updated" jdbcType="VARCHAR" property="updated"/>
+        <result column="updated_time" jdbcType="TIMESTAMP" property="updatedTime"/>
+
+        <collection property="roles" ofType="com.qihao.pojo.SysRole">
+            <id column="role_id" property="id" jdbcType="INTEGER"></id>
+            <result column="role_name" property="roleName" jdbcType="VARCHAR"></result>
+            <collection property="privileges" ofType="com.qihao.pojo.SysPrivilege">
+                <id column="privilege_id" property="id" jdbcType="INTEGER"/>
+                <result column="parent_id" property="parentId" jdbcType="INTEGER"/>
+                <result column="privileges_name" property="name" jdbcType="VARCHAR"/>
+                <result column="type" property="type" jdbcType="INTEGER"/>
+                <result column="order_num" property="orderNum" jdbcType="INTEGER"/>
+                <result column="url" property="url" jdbcType="VARCHAR"/>
+            </collection>
+        </collection>
+    </resultMap>
+
+
+    <sql id="Base_Column_List">
+        id, username, password, 'name', is_disabled, created, created_time, updated, updated_time
+    </sql>
+
+    <!-- 根据登录名查询用户信息 -->
+    <select id="selectByUsername" resultMap="BaseResultMap" parameterType="String">
+        select u.id id, u.username username, u.password password, u.name 'name', u.is_disabled is_disabled,
+            u.created created, u.created_time created_time, u.updated updated, u.updated_time updated_time,
+            r.role_name roleName, r.id role_id,
+            p.id privilege_id, p.parent_id parentId, p.name privileges_name, p.type 'type', p.order_num order_num, p.url url
+         from sys_user u
+        left join sys_user_role ur on ur.user_id = u.id
+        left join sys_role r on r.id = ur.role_id
+        left join sys_role_privilege rp on rp.role_id = r.id
+        left join sys_privilege p on p.id = rp.privilege_id
+        where u.user_name = #{username}
+    </select>
+
+</mapper>
